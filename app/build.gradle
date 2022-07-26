@@ -103,6 +103,9 @@ dependencies {
     implementation "org.koin:koin-android:$koinVersion"
     implementation "org.koin:koin-androidx-viewmodel:$koinVersion"
 
+    //timber for logs
+    implementation "com.jakewharton.timber:timber:4.7.1"
+
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:30.3.0')
 
