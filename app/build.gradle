@@ -16,6 +16,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -30,6 +31,22 @@ android {
         includeAndroidResources = true
         returnDefaultValues = true
     }
+
+    compileOptions{
+        sourceCompatibility=1.8
+        targetCompatibility=1.8
+    }
+
+//    sourceSets{
+//        def sharedTestSourceDir="$projectDir/src/testShared/java"
+//
+//        test{
+//            java.srcDir+=sharedTestSourceDir
+//        }
+//        androidTest{
+//            java.srcDirs+=sharedTestSourceDir
+//        }
+//    }
 
     //dataBinding {
     //    enabled = true
@@ -52,12 +69,16 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
 
+    //multidex support
+    implementation 'com.android.support:multidex:1.0.3'
+
     implementation 'com.google.code.gson:gson:2.8.5'
 
     // Architecture Components
     //Navigation dependencies
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-rc1'
+    testImplementation project(path: ':app')
     androidTestImplementation project(path: ':app')
     kapt "androidx.lifecycle:lifecycle-compiler:$archLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$archLifecycleVersion"
@@ -73,6 +94,8 @@ dependencies {
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
 
+    implementation "androidx.core:core-ktx:1.6.0"
+
     //Coroutines Dependencies
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
@@ -84,7 +107,7 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:30.3.0')
 
     implementation 'com.firebaseui:firebase-ui-auth:5.0.0'
-    implementation 'com.google.firebase:firebase-auth-ktx:21.0.6'
+    implementation 'com.google.firebase:firebase-auth-ktx:21.0.1'
 
 
     // Dependencies for local unit tests
