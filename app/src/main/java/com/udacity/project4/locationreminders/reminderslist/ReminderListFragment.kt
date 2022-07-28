@@ -4,9 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
 import com.udacity.project4.authentication.AuthenticationActivity
+import com.udacity.project4.authentication.FirebaseUserLiveData
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
@@ -35,8 +37,18 @@ class ReminderListFragment : BaseFragment() {
         setTitle(getString(R.string.app_name))
 
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
+        checkUser()
 
         return binding.root
+    }
+
+    private fun checkUser() {
+        FirebaseUserLiveData().observe(requireActivity(), Observer {
+            if(it==null){
+                startActivity(Intent(requireActivity(),AuthenticationActivity::class.java))
+                requireActivity().finish()
+            }
+        })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

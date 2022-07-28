@@ -3,6 +3,7 @@ package com.udacity.project4.authentication
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -21,14 +22,14 @@ import java.util.ArrayList
  * This class should be the starting point of the app, It asks the users to sign in / register, and redirects the
  * signed in users to the RemindersActivity.
  */
+
+private const val REQUEST_CODE_FOR_SIGN_IN=101
+
 class AuthenticationActivity : AppCompatActivity() {
 
-    private lateinit var viewModel:AuthenticationViewModel
+
     private lateinit var binding:ActivityAuthenticationBinding
 
-    companion object{
-        const val SIGN_IN_CODE=5000
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +50,7 @@ class AuthenticationActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode== SIGN_IN_CODE){
+        if(requestCode== REQUEST_CODE_FOR_SIGN_IN){
             val response=IdpResponse.fromResultIntent(data)
             if(requestCode==Activity.RESULT_OK){
                 Timber.d("Logged in Successfully")
@@ -64,14 +65,8 @@ class AuthenticationActivity : AppCompatActivity() {
     }
 
     private fun observeAuthenticationState() {
-        viewModel.authenticationState.observe(this, Observer { authenticationState ->
-            when(authenticationState){
-                AuthenticationViewModel.AuthenticationState.AUTHENTICATED -> {
-                    startActivity(Intent(this,RemindersActivity::class.java))
-                    finish()
-                }
-            }
-        })
+        startActivity(Intent(this,RemindersActivity::class.java))
+        finish()
     }
 
     private fun launchSignInFlow() {
@@ -81,7 +76,7 @@ class AuthenticationActivity : AppCompatActivity() {
         startActivityForResult(
             AuthUI.getInstance().createSignInIntentBuilder()
                 .setAvailableProviders(providers)
-                .build() , SIGN_IN_CODE
+                .build() , REQUEST_CODE_FOR_SIGN_IN
         )
     }
 
