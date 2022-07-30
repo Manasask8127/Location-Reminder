@@ -12,6 +12,7 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import com.google.android.gms.maps.model.LatLng
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -30,9 +31,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.mockito.Mockito
 import com.udacity.project4.locationreminders.*
-import com.udacity.project4.locationreminders.utils.MainCoroutineRule
-import com.udacity.project4.locationreminders.data.FakeDataSource
-
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.getOrAwaitValue
 
 
 @RunWith(AndroidJUnit4::class)
@@ -43,6 +43,8 @@ class SaveReminderFragmentTest {
 
     @get:Rule
     val instantTaskExecutorRule=InstantTaskExecutorRule()
+
+    private val bengaluru= LatLng(12.971599,77.594566)
 
     @Before
     fun initRepo(){
@@ -75,27 +77,16 @@ class SaveReminderFragmentTest {
         onView(withId(R.id.snackbar_text)).check(matches(withText(R.string.err_enter_title)))
     }
 
-    @Test
-    fun noTitleSuccess(){
-        val reminder= validReminderDataItem
-
-        val navController=Mockito.mock(NavController::class.java)
-        val scenario= launchFragmentInContainer<SaveReminderFragment>(Bundle.EMPTY, R.style.AppTheme)
-
-        scenario.onFragment {
-            Navigation.setViewNavController(it.view!!,navController)
-        }
-        onView(withId(R.id.reminderTitle)).perform(ViewActions.typeText(reminder.title))
-        onView(withId(R.id.reminderDescription)).perform(ViewActions.typeText(reminder.description))
-
-        saveReminderViewModel.saveReminder(reminder)
-
-        assertThat(saveReminderViewModel.showToast.getOrAwaitValue(),`is`("Reminder Saved"))
-    }
 
     @Test
     fun saveReminder(){
-        val reminder=validReminderDataItem
+        val reminder=ReminderDataItem(
+            "Title",
+            "Description",
+            "Bengaluru",
+            bengaluru.latitude,
+            bengaluru.longitude
+        )
 
         val navController=Mockito.mock(NavController::class.java)
         val scenario= launchFragmentInContainer<SaveReminderFragment>(Bundle.EMPTY,R.style.AppTheme)
@@ -108,7 +99,7 @@ class SaveReminderFragmentTest {
 
         saveReminderViewModel.saveReminder(reminder)
 
-        assertThat(saveReminderViewModel.showToast.getOrAwaitValue(),`is`("Reminder Saved!"))
+        assertThat(saveReminderViewModel.showToast.getOrAwaitValue(),`is`("Reminder Saved !"))
 
     }
 }

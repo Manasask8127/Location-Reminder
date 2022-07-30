@@ -12,10 +12,13 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import com.google.android.gms.maps.model.LatLng
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.data.ReminderDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.utils.MainAndroidCoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
@@ -46,8 +49,9 @@ class ReminderListFragmentTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @get:Rule
-    val mainCoroutineRule = MainCoroutineRule()
+    val mainCoroutineRule = MainAndroidCoroutineRule()
 
+    private val bengaluru= LatLng(12.971599,77.594566)
     @Before
     fun initrepo() {
         stopKoin()
@@ -84,7 +88,13 @@ class ReminderListFragmentTest {
 
     @Test
     fun validReminders()=mainCoroutineRule.runBlockingTest{
-        val reminderDTO=validReminderDTO
+        val reminderDTO= ReminderDTO(
+            "Title",
+            "Description",
+            "Bengaluru",
+            bengaluru.latitude,
+            bengaluru.longitude
+        )
         runBlocking {
             dataSource.saveReminder(reminderDTO)
         }

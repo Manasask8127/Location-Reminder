@@ -58,7 +58,8 @@
             android:textSize="@dimen/text_size_large"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textColor="@color/colorPrimaryDark"
-            tools:text="@string/title"/>
+            tools:text="@string/title"
+            android:layout_marginLeft="32dp" />
 
         <TextView
             android:layout_width="match_parent"

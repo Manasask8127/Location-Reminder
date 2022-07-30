@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import com.google.android.gms.maps.model.LatLng
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,6 +30,7 @@ class RemindersDaoTest {
 
     private lateinit var database:RemindersDatabase
 
+    private val bengaluru= LatLng(12.971599,77.594566)
     @Before
     fun initDB(){
         database=Room.inMemoryDatabaseBuilder(
@@ -43,17 +45,29 @@ class RemindersDaoTest {
 
     @Test
     fun saveAndRetrieveRemainder()= runBlockingTest {
-        val reminderDTO=validReminderDTO
+        val reminderDTO=ReminderDTO(
+            "Title",
+            "Description",
+            "Bengaluru",
+            bengaluru.latitude,
+            bengaluru.longitude
+        )
         database.reminderDao().saveReminder(reminderDTO)
 
         val retrieveDTO=database.reminderDao().getReminderById(reminderDTO.id)
 
-        assertThat<ReminderDTO>(retrieveDTO as ReminderDTO, notNullValue())
+        assertThat(retrieveDTO as ReminderDTO, notNullValue())
         assertThat(retrieveDTO.title,`is`(reminderDTO.title))
         assertThat(retrieveDTO.description,`is`(reminderDTO.description))
         assertThat(retrieveDTO.location,`is`(reminderDTO.location))
         assertThat(retrieveDTO.latitude,`is`(reminderDTO.latitude))
         assertThat(retrieveDTO.longitude,`is`(reminderDTO.longitude))
+    }
+
+    @Test
+    fun saveAndRetrieveRemainderNull()= runBlockingTest {
+        val retrieveDTO=database.reminderDao().getReminderById("abc")
+        assertThat(null,`is`(retrieveDTO))
     }
 
 }

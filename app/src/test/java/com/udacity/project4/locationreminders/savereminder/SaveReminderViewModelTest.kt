@@ -58,7 +58,7 @@ class SaveReminderViewModelTest {
         val reminderDataItem= nullReminderDataItem
 
         saveReminderViewModel.saveReminder(reminderDataItem)
-        assertThat(saveReminderViewModel.showToast.getOrAwaitValue(),`is`("Reminder Saved"))
+        assertThat(saveReminderViewModel.showToast.getOrAwaitValue(),`is`("Reminder Saved !"))
     }
 
     @Test

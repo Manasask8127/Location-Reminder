@@ -16,6 +16,7 @@ import android.provider.Settings
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
@@ -39,11 +40,10 @@ import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.BuildConfig
 import org.koin.android.ext.android.inject
 import timber.log.Timber
+import java.util.*
 
-private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE=33
-private const val LOCATION_PERMISSION_INDEX=0
+
 private const val REQUEST_TO_TURN_ON_LOCATION=29
-private const val BACKGROUND_LOCATION_PERMISSION_INDEX=1
 private const val REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE=34
 
 
@@ -97,181 +97,149 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
                 _viewModel.longitude.value = latLng.longitude
                 _viewModel.selectedPOI.value = pointOfInterest
                 _viewModel.reminderSelectedLocationStr.value = pointOfInterest.name
-                _viewModel.navigationCommand.value =
-                    NavigationCommand.To(SelectLocationFragmentDirections.actionSelectLocationFragmentToSaveReminderFragment())
-            } else
-                Snackbar.make(binding.saveLocationButton, R.string.select_poi, Snackbar.LENGTH_LONG)
-                    .show()
-        }
-
-
-    }
-
-
-    @SuppressLint("MissingPermission")
-    private fun requestToEnableLocation() {
-        if (foregroundAndBackgroundLocationPermissionEnabled()) {
-            map.isMyLocationEnabled = true
-        } else {
-            requestForegroundAndBackgroundPermission()
-        }
-    }
-
-    private fun foregroundAndBackgroundLocationPermissionEnabled(): Boolean {
-        val foregroundLocationEnabled = (
-                PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
-                    requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-                ))
-        val bakgroundLocationEnabled =
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
-                    requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                )
-            } else
-                true
-
-        return foregroundLocationEnabled && bakgroundLocationEnabled
-    }
-
-    private fun requestForegroundAndBackgroundPermission() {
-        if (foregroundAndBackgroundLocationPermissionEnabled()) {
-            return
-        }
-        var permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        val resultCode = when {
-            runningQOrLater -> {
-                permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
-            }
-            else ->
-                REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE
-
-        }
-
-        requestPermissions(permissions, resultCode)
-    }
-
-    private fun checkDeviceLocation(resolve: Boolean = true) {
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_LOW_POWER
-        }
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-
-        val settingsClient = LocationServices.getSettingsClient(requireContext())
-        val locationSettingsResponseTask = settingsClient.checkLocationSettings(builder.build())
-        locationSettingsResponseTask.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException && resolve) {
-                try {
-                    exception.startResolutionForResult(activity!!, REQUEST_TO_TURN_ON_LOCATION)
-                } catch (ex: IntentSender.SendIntentException) {
-                    Timber.d("Error while location settings ${ex.message}")
-                }
+                _viewModel.navigationCommand.value = NavigationCommand.Back
             } else {
-                Snackbar.make(
-                    binding.mapLayout,
-                    "Location required", Snackbar.LENGTH_INDEFINITE
-                ).setAction("Ok") {
-                    checkDeviceLocation()
-                }.show()
+                Toast.makeText(requireContext(), R.string.select_poi, Toast.LENGTH_LONG).show()
             }
         }
 
+
     }
+
+
+    private fun locationPermissionEnabled() {
+        when {
+            (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED) -> {
+                map.isMyLocationEnabled = true
+            }
+            (ActivityCompat.shouldShowRequestPermissionRationale(
+                requireActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )) -> {
+                val snackbar = Snackbar.make(
+                    binding.root,
+                    "Know your location",
+                    Snackbar.LENGTH_LONG
+                ).show()
+                requestPermission()
+            }
+            else -> {
+                requestPermission()
+            }
+        }
+    }
+
+    private fun requestPermission() {
+        requestPermissions(
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE
+        )
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.map_options, menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        // TODO: Change the map type based on the user's selection.
-        R.id.normal_map -> {
-            map.mapType == GoogleMap.MAP_TYPE_NORMAL
-            true
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.normal_map -> {
+                map.mapType == GoogleMap.MAP_TYPE_NORMAL
+            }
+            R.id.hybrid_map -> {
+                map.mapType = GoogleMap.MAP_TYPE_HYBRID
+
+            }
+            R.id.satellite_map -> {
+                map.mapType = GoogleMap.MAP_TYPE_SATELLITE
+
+            }
+            R.id.terrain_map -> {
+                map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        R.id.hybrid_map -> {
-            map.mapType = GoogleMap.MAP_TYPE_HYBRID
-            true
-        }
-        R.id.satellite_map -> {
-            map.mapType = GoogleMap.MAP_TYPE_SATELLITE
-            true
-        }
-        R.id.terrain_map -> {
-            map.mapType = GoogleMap.MAP_TYPE_TERRAIN
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
+        return true
     }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        map.mapType=GoogleMap.MAP_TYPE_NORMAL
         map.uiSettings.isZoomControlsEnabled = true
         val latitude = 12.965616
         val longitude = 77.5761
-        val zoom = 15f
+        val zoom = 10f
         val cityLatLong = LatLng(latitude, longitude)
         map.addMarker(MarkerOptions().position(cityLatLong).title("marker for city"))
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(cityLatLong, zoom))
         // map.addMarker(MarkerOptions().position(cityLatLong))
-        requestToEnableLocation()
+        setMapStyle(map)
+        locationPermissionEnabled()
         setPoiClickListener(map)
+        setOnMapClick(map)
         onLocationSelected()
-        map.setOnMyLocationClickListener(
-            GoogleMap.OnMyLocationClickListener {
-                checkDeviceLocation()
-                true
-            }
-        )
-//        setMapStyle(map)
-//        requestToEnableLocation()
-//        requestForegroundAndBackgroundPermission()
-//        setPoiClick(map)
-
     }
 
-    private fun setPoiClickListener(map: GoogleMap) {
-        map.setOnPoiClickListener { poi ->
+    private fun setOnMapClick(map: GoogleMap) {
+        map.setOnMapClickListener {
             map.clear()
-            this.pointOfInterest = poi
-            val poiMaker = map.addMarker(
-                MarkerOptions().position(poi.latLng).title(poi.name)
+            val droppedPin = getString(R.string.dropped_pin)
+            val snippet = getValueSnippet(it)
+            pointOfInterest = PointOfInterest(it, droppedPin, snippet)
+            val marker = map.addMarker(
+                MarkerOptions()
+                    .position(it).title(getString(R.string.dropped_pin)).snippet(
+                        getValueSnippet(it)
+                    )
             )
             map.addCircle(
-                CircleOptions().center(poi.latLng).radius(250.00)
+                CircleOptions().center(it).radius(250.0)
+                    .strokeColor(Color.GREEN).fillColor(Color.WHITE).strokeWidth(3F)
+            )
+            marker.showInfoWindow()
+        }
+    }
+
+    private fun getValueSnippet(it: LatLng?) = String.format(
+        Locale.getDefault(),
+        "LatLng: %1$.5f,Long:%2$.5f",
+        it!!.latitude,
+        it!!.longitude
+    )
+
+
+    private fun setPoiClickListener(map: GoogleMap) {
+        map.setOnPoiClickListener {
+            map.clear()
+            pointOfInterest = it
+            val poiMaker = map.addMarker(
+                MarkerOptions().position(pointOfInterest.latLng).title(pointOfInterest.name)
+            )
+            map.addCircle(
+                CircleOptions().center(pointOfInterest.latLng).radius(250.00)
                     .strokeColor(Color.WHITE).fillColor(Color.MAGENTA).strokeWidth(3F)
             )
             poiMaker.showInfoWindow()
         }
     }
 
-//    private fun setMapStyle(map: GoogleMap?) {
-//        try {
-//            val success = map?.setMapStyle(
-//                MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style)
-//            )
-//            if (!success!!)
-//                Timber.d("Style parsng failed")
-//
-//        }
-//        catch (e:Resources.NotFoundException) {
-//            Timber.d("Can't find style to parse , Error: ${e}")
-//        }
-//    }
-//
-//
-//    private fun setPoiClick(map: GoogleMap?) {
-//        map?.setOnPoiClickListener { poi->
-//            binding.saveLocationButton.visibility=View.VISIBLE
-//            val poiMarket= map.addMarker(MarkerOptions().position(poi.latLng).title(poi.name)
-//                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-//            val zoom=17f
-//            map.moveCamera(CameraUpdateFactory.newLatLngZoom(poi.latLng,zoom))
-//            poiMarket?.showInfoWindow()
-//
-//            binding.saveLocationButton.setOnClickListener {
-//                onLocationSelected(poi)
-//            }
-//        }
+    private fun setMapStyle(map: GoogleMap?) {
+        try {
+            val success = map?.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style)
+            )
+            if (!success!!)
+                Timber.d("Style parsng failed")
+
+        } catch (e: Resources.NotFoundException) {
+            Timber.d("Can't find style to parse , Error: ${e}")
+        }
+    }
+
 
 
     @SuppressLint("MissingPermission")
@@ -279,27 +247,18 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
-    )
-    {
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (
-            grantResults.isEmpty() || grantResults[LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED
-            || (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
-                    grantResults[BACKGROUND_LOCATION_PERMISSION_INDEX] == PackageManager.PERMISSION_DENIED)
-        ) {
-            Snackbar.make(
-                binding.mapLayout,
-                "Permission Denied", Snackbar.LENGTH_LONG
-            ).setAction("Settings")
-            {
-                startActivity(Intent().apply {
-                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                    data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-            }.show()
-        } else {
-            map.isMyLocationEnabled = true
+        if (requestCode == REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                locationPermissionEnabled()
+            } else {
+                Snackbar.make(
+                    binding.root,
+                    "Permission not granted to access location",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }

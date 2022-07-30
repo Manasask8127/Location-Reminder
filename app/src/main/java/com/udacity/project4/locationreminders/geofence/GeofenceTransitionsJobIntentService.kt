@@ -22,6 +22,8 @@ import kotlin.coroutines.CoroutineContext
 class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
 
     private var coroutineJob: Job = Job()
+
+
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + coroutineJob
 
@@ -51,29 +53,22 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
         }
         if(geofencingEvent.geofenceTransition==Geofence.GEOFENCE_TRANSITION_ENTER){
             Timber.d(resources.getString(R.string.geofence_entered))
-            val enterGeoFence=geofencingEvent.triggeringGeofences
-            sendNotification(enterGeoFence)
+            geofencingEvent.triggeringGeofences.forEach(::sendNotification)
+           // sendNotification(enterGeoFence)
         }
 
     }
 
     //TODO: get the request id of the current geofence
-    private fun sendNotification(triggeringGeofences: List<Geofence>) {
-        val requestId = when{
-            triggeringGeofences.isNotEmpty()->
-                triggeringGeofences[0].requestId
-            else ->{
-                Timber.d("No GeoFence trigger found")
-                return
-            }
-        }
+    private fun sendNotification(triggeringGeofence: Geofence)
+    {
 
         //Get the local repository instance
         val remindersLocalRepository: ReminderDataSource by inject()
 //        Interaction to the repository has to be through a coroutine scope
         CoroutineScope(coroutineContext).launch(SupervisorJob()) {
             //get the reminder with the request id
-            val result = remindersLocalRepository.getReminder(requestId)
+            val result = remindersLocalRepository.getReminder(triggeringGeofence.requestId)
             if (result is Result.Success<ReminderDTO>) {
                 val reminderDTO = result.data
                 //send a notification to the user with the reminder details

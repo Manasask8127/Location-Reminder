@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -47,22 +48,22 @@ class AuthenticationActivity : AppCompatActivity() {
 
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if(requestCode== REQUEST_CODE_FOR_SIGN_IN){
-            val response=IdpResponse.fromResultIntent(data)
-            if(requestCode==Activity.RESULT_OK){
-                Timber.d("Logged in Successfully")
-                observeAuthenticationState()
-            }
-            else{
-                Timber.d("login failed due to ${response?.error?.errorCode}")
-                Toast.makeText(this,"Unable to login",Toast.LENGTH_LONG).show()
-
-            }
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//
+//        if(requestCode== REQUEST_CODE_FOR_SIGN_IN){
+//            val response=IdpResponse.fromResultIntent(data)
+//            if(requestCode==Activity.RESULT_OK){
+//                Timber.d("Logged in Successfully")
+//                observeAuthenticationState()
+//            }
+//            else{
+//                Timber.d("login failed due to ${response?.error?.errorCode}")
+//                Toast.makeText(this,"Unable to login",Toast.LENGTH_LONG).show()
+//
+//            }
+//        }
+//    }
 
     private fun observeAuthenticationState() {
         startActivity(Intent(this,RemindersActivity::class.java))
@@ -73,12 +74,30 @@ class AuthenticationActivity : AppCompatActivity() {
         val providers= arrayListOf(AuthUI.IdpConfig.EmailBuilder().build(),
         AuthUI.IdpConfig.GoogleBuilder().build())
 
-        startActivityForResult(
-            AuthUI.getInstance().createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build() , REQUEST_CODE_FOR_SIGN_IN
-        )
+//        startActivityForResult(
+//            AuthUI.getInstance().createSignInIntentBuilder()
+//                .setAvailableProviders(providers)
+//                .build() , REQUEST_CODE_FOR_SIGN_IN
+//        )
+
+        getResult.launch(AuthUI.getInstance().createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build())
     }
+
+    private val getResult =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()) {
+            if(it.resultCode == Activity.RESULT_OK){
+                Timber.d("Logged in Successfully")
+                observeAuthenticationState()
+            }
+            else{
+                Timber.d("login failed ")
+                Toast.makeText(this,"Unable to login",Toast.LENGTH_LONG).show()
+
+            }
+        }
 
 
 
