@@ -172,21 +172,22 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
         map.uiSettings.isZoomControlsEnabled = true
         val latitude = 12.965616
         val longitude = 77.5761
-        val zoom = 10f
+        val zoom = 15f
         val cityLatLong = LatLng(latitude, longitude)
-        map.addMarker(MarkerOptions().position(cityLatLong).title("marker for city"))
+//        map.addMarker(MarkerOptions().position(cityLatLong).snippet(getValueSnippet(cityLatLong)))
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(cityLatLong, zoom))
-        // map.addMarker(MarkerOptions().position(cityLatLong))
+//        // map.addMarker(MarkerOptions().position(cityLatLong))
         setMapStyle(map)
         locationPermissionEnabled()
-        setPoiClickListener(map)
         setOnMapClick(map)
+        setPoiClickListener(map)
+
         onLocationSelected()
     }
 
     private fun setOnMapClick(map: GoogleMap) {
         map.setOnMapClickListener {
-            map.clear()
+            //map.clear()
             val droppedPin = getString(R.string.dropped_pin)
             val snippet = getValueSnippet(it)
             pointOfInterest = PointOfInterest(it, droppedPin, snippet)

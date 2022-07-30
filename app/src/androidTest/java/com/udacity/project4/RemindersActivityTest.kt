@@ -10,6 +10,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -27,6 +28,7 @@ import com.udacity.project4.utils.monitorActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers
+import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -128,13 +130,16 @@ class RemindersActivityTest :
         closeSoftKeyboard()
 
         onView(withId(R.id.selectLocation)).perform(click())
-        delay(300)
+            delay(2000)
         onView(withId(R.id.map_container)).perform(click())
+    delay(3000)
         onView(withId(R.id.save_location_button)).perform(click())
-        onView(withId(R.id.saveReminder)).perform(click())
+    // onView(withId(R.id.addReminderFAB)).perform(click())
 
-    onView(withText(R.string.reminder_saved)).inRoot(RootMatchers.withDecorView(
-        CoreMatchers.not(decorView))).check(matches(isDisplayed()))
+    delay(1000)
+        onView(withId(R.id.saveReminder)).perform(click())
+    delay(3000)
+    onView(withText(R.string.reminder_saved)).inRoot(withDecorView(not(decorView))).check(matches(isDisplayed()))
 
     //pressBack()
 
@@ -145,7 +150,7 @@ class RemindersActivityTest :
     }
 
     @Test
-    fun selectLocationToast(){
+    fun selectLocationToast()= runBlocking{
         runBlocking {
             repository.deleteAllReminders()
         }
@@ -160,9 +165,8 @@ class RemindersActivityTest :
 
         onView(withId(R.id.selectLocation)).perform(click())
         onView(withId(R.id.save_location_button)).perform(click())
-
-        onView(withText(R.string.select_poi)).inRoot(RootMatchers.withDecorView(
-            CoreMatchers.not(decorView))).check(matches(isDisplayed()))
+        delay(100)
+        onView(withText(R.string.select_poi)).inRoot(withDecorView(not(decorView))).check(matches(isDisplayed()))
 
         scenario.close()
     }
