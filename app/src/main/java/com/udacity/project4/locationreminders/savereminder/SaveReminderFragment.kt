@@ -66,12 +66,15 @@ class SaveReminderFragment : BaseFragment() {
         binding.viewModel = _viewModel
         geofenceClient = LocationServices.getGeofencingClient(requireContext())
 
+
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
+
         binding.selectLocation.setOnClickListener {
             //            Navigate to another fragment to get the user location
             _viewModel.navigationCommand.value =
@@ -256,6 +259,11 @@ class SaveReminderFragment : BaseFragment() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        _viewModel.setTitleAndDescription(binding.reminderTitle.text.toString(),binding.reminderDescription.text.toString())
     }
 
     override fun onDestroy() {

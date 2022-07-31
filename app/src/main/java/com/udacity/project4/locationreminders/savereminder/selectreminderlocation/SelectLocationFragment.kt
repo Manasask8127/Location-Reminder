@@ -80,10 +80,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding.saveLocationButton.setOnClickListener {
             if (this::pointOfInterest.isInitialized) {
                 val latLng = pointOfInterest.latLng
-                _viewModel.latitude.value = latLng.latitude
-                _viewModel.longitude.value = latLng.longitude
-                _viewModel.selectedPOI.value = pointOfInterest
-                _viewModel.reminderSelectedLocationStr.value = pointOfInterest.name
+                _viewModel.setLocationDetails(latLng.latitude,latLng.longitude,pointOfInterest,pointOfInterest.name)
+//                _viewModel.latitude.value = latLng.latitude
+//                _viewModel.longitude.value = latLng.longitude
+//                _viewModel.selectedPOI.value = pointOfInterest
+//                _viewModel.reminderSelectedLocationStr.value = pointOfInterest.name
+
+
                 _viewModel.navigationCommand.value = NavigationCommand.Back
             } else {
                 Toast.makeText(requireContext(), R.string.select_poi, Toast.LENGTH_LONG).show()
