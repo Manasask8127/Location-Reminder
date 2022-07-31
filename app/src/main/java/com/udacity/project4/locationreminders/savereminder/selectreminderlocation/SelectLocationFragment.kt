@@ -3,27 +3,15 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
-import android.media.audiofx.Equalizer
-import android.net.Uri
+import android.location.Geocoder
 import android.os.Bundle
-import android.provider.Settings
-import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.databinding.DataBindingUtil
-import com.firebase.ui.auth.data.model.Resource
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -37,7 +25,6 @@ import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
-import org.koin.android.BuildConfig
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 import java.util.*
@@ -167,36 +154,38 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
 
 
     override fun onMapReady(googleMap: GoogleMap) {
+
         map = googleMap
-        map.mapType=GoogleMap.MAP_TYPE_NORMAL
+
+        map.mapType = GoogleMap.MAP_TYPE_NORMAL
         map.uiSettings.isZoomControlsEnabled = true
         val latitude = 12.965616
         val longitude = 77.5761
-        val zoom = 15f
+        val zoom = 13f
         val cityLatLong = LatLng(latitude, longitude)
-//        map.addMarker(MarkerOptions().position(cityLatLong).snippet(getValueSnippet(cityLatLong)))
+
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(cityLatLong, zoom))
-//        // map.addMarker(MarkerOptions().position(cityLatLong))
+
         setMapStyle(map)
         locationPermissionEnabled()
-        setOnMapClick(map)
         setPoiClickListener(map)
-
+        setOnMapClick(map)
         onLocationSelected()
     }
 
     private fun setOnMapClick(map: GoogleMap) {
         map.setOnMapClickListener {
-            //map.clear()
+            map.clear()
             val droppedPin = getString(R.string.dropped_pin)
             val snippet = getValueSnippet(it)
             pointOfInterest = PointOfInterest(it, droppedPin, snippet)
             val marker = map.addMarker(
                 MarkerOptions()
-                    .position(it).title(getString(R.string.dropped_pin)).snippet(
+                    .position(it).title(droppedPin).snippet(
                         getValueSnippet(it)
                     )
             )
+            Timber.d("poi name mapclick ${pointOfInterest.name}")
             map.addCircle(
                 CircleOptions().center(it).radius(250.0)
                     .strokeColor(Color.GREEN).fillColor(Color.WHITE).strokeWidth(3F)
@@ -205,12 +194,13 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
         }
     }
 
-    private fun getValueSnippet(it: LatLng?) = String.format(
-        Locale.getDefault(),
-        "LatLng: %1$.5f,Long:%2$.5f",
-        it!!.latitude,
-        it!!.longitude
-    )
+    private fun getValueSnippet(it: LatLng?) : String {
+    val location = Geocoder(requireContext(), Locale.getDefault())
+    val addresses= location.getFromLocation(it!!.latitude, it!!.longitude,1)
+    val cityName: String = addresses.get(0).subLocality
+    return cityName
+
+    }
 
 
     private fun setPoiClickListener(map: GoogleMap) {
@@ -220,6 +210,7 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
             val poiMaker = map.addMarker(
                 MarkerOptions().position(pointOfInterest.latLng).title(pointOfInterest.name)
             )
+            Timber.d("poi name ${pointOfInterest.name}")
             map.addCircle(
                 CircleOptions().center(pointOfInterest.latLng).radius(250.00)
                     .strokeColor(Color.WHITE).fillColor(Color.MAGENTA).strokeWidth(3F)
@@ -234,7 +225,7 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
                 MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style)
             )
             if (!success!!)
-                Timber.d("Style parsng failed")
+                Timber.d("Style parsing failed")
 
         } catch (e: Resources.NotFoundException) {
             Timber.d("Can't find style to parse , Error: ${e}")
