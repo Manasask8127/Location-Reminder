@@ -24,22 +24,22 @@ import java.util.ArrayList
  * signed in users to the RemindersActivity.
  */
 
-private const val REQUEST_CODE_FOR_SIGN_IN=101
+private const val REQUEST_CODE_FOR_SIGN_IN = 101
 
 class AuthenticationActivity : AppCompatActivity() {
 
 
-    private lateinit var binding:ActivityAuthenticationBinding
+    private lateinit var binding: ActivityAuthenticationBinding
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding=DataBindingUtil.setContentView(this,R.layout.activity_authentication)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
 //         TODO: Implement the create account and sign in using FirebaseUI, use sign in using email and sign in using Google
 
 //          TODO: If the user was authenticated, send him to RemindersActivity
 
-        binding.authenticationButton.setOnClickListener{
+        binding.authenticationButton.setOnClickListener {
             launchSignInFlow()
         }
 
@@ -66,40 +66,37 @@ class AuthenticationActivity : AppCompatActivity() {
 //    }
 
     private fun observeAuthenticationState() {
-        startActivity(Intent(this,RemindersActivity::class.java))
+        startActivity(Intent(this, RemindersActivity::class.java))
         finish()
     }
 
     private fun launchSignInFlow() {
-        val providers= arrayListOf(AuthUI.IdpConfig.EmailBuilder().build(),
-        AuthUI.IdpConfig.GoogleBuilder().build())
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
+        )
 
-//        startActivityForResult(
-//            AuthUI.getInstance().createSignInIntentBuilder()
-//                .setAvailableProviders(providers)
-//                .build() , REQUEST_CODE_FOR_SIGN_IN
-//        )
 
-        getResult.launch(AuthUI.getInstance().createSignInIntentBuilder()
-            .setAvailableProviders(providers)
-            .build())
+        getResult.launch(
+            AuthUI.getInstance().createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .build()
+        )
     }
 
     private val getResult =
         registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()) {
-            if(it.resultCode == Activity.RESULT_OK){
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            if (it.resultCode == Activity.RESULT_OK) {
                 Timber.d("Logged in Successfully")
                 observeAuthenticationState()
-            }
-            else{
+            } else {
                 Timber.d("login failed ")
-                Toast.makeText(this,"Unable to login",Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Unable to login", Toast.LENGTH_LONG).show()
 
             }
         }
-
-
 
 
 }

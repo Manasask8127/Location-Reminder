@@ -70,9 +70,9 @@ class RemindersLocalRepository(
      */
     override suspend fun deleteAllReminders() {
         wrapEspressoIdlingResource {
-        withContext(ioDispatcher) {
-            remindersDao.deleteAllReminders()
-        }
+            withContext(ioDispatcher) {
+                remindersDao.deleteAllReminders()
+            }
         }
     }
 }

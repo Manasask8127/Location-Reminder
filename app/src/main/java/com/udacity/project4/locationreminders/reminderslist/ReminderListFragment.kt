@@ -46,8 +46,8 @@ class ReminderListFragment : BaseFragment() {
 
     private fun checkUser() {
         FirebaseUserLiveData().observe(requireActivity(), Observer {
-            if(it==null){
-                startActivity(Intent(requireActivity(),AuthenticationActivity::class.java))
+            if (it == null) {
+                startActivity(Intent(requireActivity(), AuthenticationActivity::class.java))
                 requireActivity().finish()
             }
         })
@@ -91,7 +91,7 @@ class ReminderListFragment : BaseFragment() {
 //                TODO: add the logout implementation
                 AuthUI.getInstance().signOut(requireContext())
                     .addOnCompleteListener {
-                        val intent=Intent(activity,AuthenticationActivity::class.java)
+                        val intent = Intent(activity, AuthenticationActivity::class.java)
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                         startActivity(intent)

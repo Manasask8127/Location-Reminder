@@ -4,15 +4,15 @@ import android.content.Context
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.udacity.project4.R
 
-internal object GeofencingConstants{
-    const val ACTION_GEOFENCE_EVENT="ACTION_GEOFENCE_EVENT"
-    const val GEO_FENCE_RADIUS_METERS=400f
-    const val GEOFENCE_EXPIRATION_IN_MILLISECONDS=200L
+internal object GeofencingConstants {
+    const val ACTION_GEOFENCE_EVENT = "ACTION_GEOFENCE_EVENT"
+    const val GEO_FENCE_RADIUS_METERS = 400f
+    const val GEOFENCE_EXPIRATION_IN_MILLISECONDS = 200L
 }
 
-fun errorMessage(context: Context,errorCode:Int):String{
-    val resources=context.resources
-    return when(errorCode){
+fun errorMessage(context: Context, errorCode: Int): String {
+    val resources = context.resources
+    return when (errorCode) {
         GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE ->
             resources.getString(R.string.geofence_not_available)
         GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES ->

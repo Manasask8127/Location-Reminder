@@ -30,12 +30,11 @@ import timber.log.Timber
 import java.util.*
 
 
-private const val REQUEST_TO_TURN_ON_LOCATION=29
-private const val REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE=34
+private const val REQUEST_TO_TURN_ON_LOCATION = 29
+private const val REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE = 34
 
 
-
-class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
+class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
@@ -194,11 +193,11 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
         }
     }
 
-    private fun getValueSnippet(it: LatLng?) : String {
-    val location = Geocoder(requireContext(), Locale.getDefault())
-    val addresses= location.getFromLocation(it!!.latitude, it!!.longitude,1)
-    val cityName: String = addresses.get(0).subLocality
-    return cityName
+    private fun getValueSnippet(it: LatLng?): String {
+        val location = Geocoder(requireContext(), Locale.getDefault())
+        val addresses = location.getFromLocation(it!!.latitude, it!!.longitude, 1)
+        val cityName: String = addresses.get(0).subLocality
+        return cityName
 
     }
 
@@ -231,7 +230,6 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
             Timber.d("Can't find style to parse , Error: ${e}")
         }
     }
-
 
 
     @SuppressLint("MissingPermission")
