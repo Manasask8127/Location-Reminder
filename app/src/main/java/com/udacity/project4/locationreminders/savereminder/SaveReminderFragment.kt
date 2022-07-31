@@ -31,6 +31,7 @@ import com.udacity.project4.utils.GeofencingConstants.GEOFENCE_EXPIRATION_IN_MIL
 import com.udacity.project4.utils.GeofencingConstants.GEO_FENCE_RADIUS_METERS
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import timber.log.Timber
 
 private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 331
@@ -39,7 +40,7 @@ private const val REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE = 341
 
 class SaveReminderFragment : BaseFragment() {
     //Get the view model this time as a single to be shared with the another fragment
-    override val _viewModel: SaveReminderViewModel by inject()
+    override val _viewModel: SaveReminderViewModel by sharedViewModel()
     private lateinit var binding: FragmentSaveReminderBinding
     private lateinit var geofenceClient: GeofencingClient
     private lateinit var reminder: ReminderDataItem
