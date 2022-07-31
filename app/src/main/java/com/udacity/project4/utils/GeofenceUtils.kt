@@ -8,6 +8,7 @@ internal object GeofencingConstants {
     const val ACTION_GEOFENCE_EVENT = "ACTION_GEOFENCE_EVENT"
     const val GEO_FENCE_RADIUS_METERS = 400f
     const val GEOFENCE_EXPIRATION_IN_MILLISECONDS = 200L
+    const val NEVER_EXPIRE=300L
 }
 
 fun errorMessage(context: Context, errorCode: Int): String {

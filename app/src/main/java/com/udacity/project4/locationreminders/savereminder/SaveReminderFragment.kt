@@ -29,6 +29,7 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.GeofencingConstants.ACTION_GEOFENCE_EVENT
 import com.udacity.project4.utils.GeofencingConstants.GEOFENCE_EXPIRATION_IN_MILLISECONDS
 import com.udacity.project4.utils.GeofencingConstants.GEO_FENCE_RADIUS_METERS
+import com.udacity.project4.utils.GeofencingConstants.NEVER_EXPIRE
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
@@ -235,7 +236,7 @@ class SaveReminderFragment : BaseFragment() {
         val geofence = Geofence.Builder()
             .setRequestId(currentGeofenceData.id)
             .setCircularRegion(reminder.latitude!!, reminder.longitude!!, GEO_FENCE_RADIUS_METERS)
-            .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+            .setExpirationDuration(NEVER_EXPIRE)
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
             .build()
 
