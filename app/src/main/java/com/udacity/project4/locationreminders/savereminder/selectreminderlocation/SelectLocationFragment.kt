@@ -80,11 +80,11 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding.saveLocationButton.setOnClickListener {
             if (this::pointOfInterest.isInitialized) {
                 val latLng = pointOfInterest.latLng
-                _viewModel.setLocationDetails(latLng.latitude,latLng.longitude,pointOfInterest,pointOfInterest.name)
-//                _viewModel.latitude.value = latLng.latitude
-//                _viewModel.longitude.value = latLng.longitude
-//                _viewModel.selectedPOI.value = pointOfInterest
-//                _viewModel.reminderSelectedLocationStr.value = pointOfInterest.name
+                //_viewModel.setLocationDetails(latLng.latitude,latLng.longitude,pointOfInterest,pointOfInterest.name)
+                _viewModel.latitude.value = latLng.latitude
+                _viewModel.longitude.value = latLng.longitude
+                _viewModel.selectedPOI.value = pointOfInterest
+                _viewModel.reminderSelectedLocationStr.value = pointOfInterest.name
 
 
                 _viewModel.navigationCommand.value = NavigationCommand.Back
@@ -171,8 +171,9 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
         setMapStyle(map)
         locationPermissionEnabled()
-        setPoiClickListener(map)
+
         setOnMapClick(map)
+        setPoiClickListener(map)
         onLocationSelected()
     }
 
@@ -197,13 +198,17 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
     }
 
-    private fun getValueSnippet(it: LatLng?): String {
-        val location = Geocoder(requireContext(), Locale.getDefault())
-        val addresses = location.getFromLocation(it!!.latitude, it!!.longitude, 1)
-        val cityName: String = addresses.get(0).subLocality
-        return cityName
+    private fun getValueSnippet(it: LatLng?)=String.format (
+//        val location = Geocoder(requireContext(), Locale.getDefault())
+//        val addresses = location.getFromLocation(it!!.latitude, it!!.longitude, 1)
+//        val cityName: String = addresses.get(0).subLocality
+//        return cityName
+            Locale.getDefault(),
+    "Lat: %1$.3f,Lng:%2$.3f",
+    it!!.latitude,
+    it!!.longitude
 
-    }
+        )
 
 
     private fun setPoiClickListener(map: GoogleMap) {

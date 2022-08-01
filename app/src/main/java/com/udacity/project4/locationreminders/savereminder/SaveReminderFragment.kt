@@ -270,10 +270,10 @@ class SaveReminderFragment : BaseFragment() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        _viewModel.setTitleAndDescription(binding.reminderTitle.text.toString(),binding.reminderDescription.text.toString())
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        _viewModel.setTitleAndDescription(binding.reminderTitle.text.toString(),binding.reminderDescription.text.toString())
+//    }
 
     override fun onDestroy() {
         super.onDestroy()
