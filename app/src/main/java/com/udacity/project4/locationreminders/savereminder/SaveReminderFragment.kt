@@ -2,6 +2,7 @@ package com.udacity.project4.locationreminders.savereminder
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentSender
@@ -14,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
@@ -81,7 +83,7 @@ class SaveReminderFragment : BaseFragment() {
             _viewModel.navigationCommand.value =
                 NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToSelectLocationFragment())
         }
-        ViewCompat.setElevation(binding.progressBar, 150f)
+        ViewCompat.setElevation(binding.progressBar, 100f)
 
         binding.saveReminder.setOnClickListener {
             val title = _viewModel.reminderTitle.value
@@ -120,9 +122,10 @@ class SaveReminderFragment : BaseFragment() {
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
                 try {
-                    exception.startResolutionForResult(
-                        requireActivity(),
-                        REQUEST_TO_TURN_ON_LOCATION
+                    startIntentSenderForResult(
+                        exception.resolution.intentSender,
+                        REQUEST_TO_TURN_ON_LOCATION,
+                        null,0,0,0,null
                     )
                 } catch (ex: IntentSender.SendIntentException) {
                     Timber.d("Error while location settings ${ex.message}")
@@ -146,14 +149,15 @@ class SaveReminderFragment : BaseFragment() {
 
     }
 
+    @TargetApi(29)
     private fun foregroundAndBackgroundLocationPermissionEnabled(): Boolean {
         val foregroundLocationEnabled = (
-                PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
                     requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
                 ))
         val bakgroundLocationEnabled =
             if (runningQOrLater) {
-                PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
                     requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION
                 )
             } else
@@ -162,6 +166,7 @@ class SaveReminderFragment : BaseFragment() {
         return foregroundLocationEnabled && bakgroundLocationEnabled
     }
 
+    @TargetApi(29)
     private fun requestForegroundAndBackgroundPermission() {
         if (foregroundAndBackgroundLocationPermissionEnabled()) {
             return
@@ -186,7 +191,7 @@ class SaveReminderFragment : BaseFragment() {
         grantResults: IntArray
     ) {
         if (grantResults.isEmpty() || grantResults[0] == PackageManager.PERMISSION_DENIED ||
-            (requestCode == REQUEST_FOREGROUND_PERMISSION_REQUEST_CODE &&
+            (requestCode == REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE &&
                     grantResults[1] == PackageManager.PERMISSION_DENIED)
         ) {
             Snackbar.make(
@@ -244,19 +249,22 @@ class SaveReminderFragment : BaseFragment() {
             GeofencingRequest.Builder().setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .addGeofence(geofence).build()
 
-
-        geofenceClient.addGeofences(geofenceRequest, geofencePendingIntent).run {
-            addOnSuccessListener {
-                Timber.d("add Geofence with id ${geofence.requestId}")
-                Snackbar.make(requireView(), "Geofence added", Snackbar.LENGTH_LONG).show()
-                if (!_viewModel.validateAndSaveReminder(reminder)) {
-                    removeGeofence(geofencePendingIntent)
-                }
-            }
-            addOnFailureListener {
-                _viewModel.showErrorMessage.postValue("error while adding")
-                if (it.message != null) {
-                    Timber.d(it.message)
+        context?.let {
+            if(ActivityCompat.checkSelfPermission(it,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
+                geofenceClient.addGeofences(geofenceRequest, geofencePendingIntent).run {
+                    addOnSuccessListener {
+                        Timber.d("add Geofence with id ${geofence.requestId}")
+                        Snackbar.make(requireView(), "Geofence added", Snackbar.LENGTH_LONG).show()
+                        if (!_viewModel.validateAndSaveReminder(reminder)) {
+                            removeGeofence(geofencePendingIntent)
+                        }
+                    }
+                    addOnFailureListener {
+                        _viewModel.showErrorMessage.postValue("error while adding")
+                        if (it.message != null) {
+                            Timber.d(it.message)
+                        }
+                    }
                 }
             }
         }
